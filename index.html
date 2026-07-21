@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TruthLens — Pause before you share</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <nav><a class="brand" href="#">truth<span>lens</span></a><span class="tag">Media literacy, made clear</span></nav>
+      <section class="hero">
+        <p class="eyebrow">PAUSE BEFORE YOU SHARE</p>
+        <h1>Understand what<br />you’re being told.</h1>
+        <p class="intro">Paste a claim, post, or headline. TruthLens breaks down the evidence, surfaces red flags, and helps you decide what to do next.</p>
+      </section>
+      <section class="analyser" aria-label="Claim analyser">
+        <div class="tabs"><button class="active">Paste a claim</button><button disabled>Upload screenshot <small>soon</small></button></div>
+        <textarea id="claim" maxlength="1000" placeholder="Example: UNESCO has banned smartphones in schools worldwide.">UNESCO has banned smartphones in schools worldwide.</textarea>
+        <div class="analyser-footer"><span id="counter">59 / 1000</span><button id="analyse">Analyse claim <span>→</span></button></div>
+      </section>
+      <section id="result" class="result hidden" aria-live="polite">
+        <div class="verdict-card">
+          <div><p class="eyebrow">ASSESSMENT</p><h2>Potentially misleading</h2><p>The claim appears to overstate UNESCO’s position. There is no evidence of a worldwide UNESCO smartphone ban.</p></div>
+          <div class="score"><strong>42</strong><span>confidence<br />score</span></div>
+        </div>
+        <div class="grid">
+          <article><h3>What we found</h3><p>UNESCO has published guidance on technology in education and recommends age-appropriate, human-centred use. It does not impose global bans.</p><a href="#sources">View evidence trail →</a></article>
+          <article><h3>Red flags to notice</h3><ul><li><b>Absolute wording:</b> “worldwide” suggests a sweeping rule.</li><li><b>No date or source:</b> The claim does not cite an official announcement.</li><li><b>Missing context:</b> Guidance and a legal ban are different things.</li></ul></article>
+          <article class="next"><h3>Before you share</h3><p>Look for the original announcement, check its date, and compare more than one credible source.</p><button id="reset">Check another claim</button></article>
+        </div>
+        <section id="sources" class="trail"><p class="eyebrow">EVIDENCE TRAIL</p><div class="trail-row"><div class="node user">Your post</div><i></i><div class="node claim-node">Claim detected</div><i></i><div class="node source">Official sources</div><i></i><div class="node outcome">Context added</div></div><p class="trail-caption">In the full product, each source links to its original publication and shows why it was selected.</p></section>
+      </section>
+      <section class="how"><p class="eyebrow">HOW TRUTHLENS HELPS</p><div><span>01</span><p>Find the claim</p><span>02</span><p>Check the evidence</p><span>03</span><p>Learn the skill</p></div></section>
+    </main>
+    <footer>TruthLens is an educational tool, not a final arbiter of truth. Always consult original, credible sources.</footer>
+    <script src="app.js"></script>
+  </body>
+</html>
