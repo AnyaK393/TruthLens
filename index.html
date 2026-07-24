@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <!-- Tesseract.js for client-side OCR image text extraction -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   </head>
   <body>
     <main>
@@ -15,32 +17,81 @@
       <section class="hero">
         <p class="eyebrow">PAUSE BEFORE YOU SHARE</p>
         <h1>Understand what<br />you’re being told.</h1>
-        <p class="intro">Paste a claim, post, or headline. TruthLens breaks down the evidence, surfaces red flags, and helps you decide what to do next.</p>
+        <p class="intro">Paste a claim, upload a screenshot, or check multi-lingual posts. TruthLens breaks down evidence, surfaces red flags, and teaches critical thinking.</p>
       </section>
       <section class="analyser" aria-label="Claim analyser">
-        <div class="tabs"><button class="active">Paste a claim</button><button disabled>Upload screenshot <small>soon</small></button></div>
-        <textarea id="claim" maxlength="1000" placeholder="Example: UNESCO has banned smartphones in schools worldwide.">UNESCO has banned smartphones in schools worldwide.</textarea>
-        <div class="analyser-footer"><span id="counter">59 / 1000</span><button id="analyse">Analyse claim <span>→</span></button></div>
+        <div class="tabs">
+          <button id="tab-text" class="active">Paste a claim</button>
+          <button id="tab-image">Upload screenshot</button>
+        </div>
+        
+        <!-- Text Input View (Empty and ready for typing) -->
+        <div id="text-input-container">
+          <textarea id="claim" maxlength="1000" placeholder="Enter your claim here..."></textarea>
+        </div>
+
+        <!-- Image Upload View (Hidden by default) -->
+        <div id="image-input-container" class="hidden" style="padding: 23px 20px;">
+          <input type="file" id="image-file" accept="image/*" style="display: none;" />
+          <div id="drop-zone" style="border: 2px dashed var(--line); border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; background: #fafaf6;">
+            <p id="upload-label" style="margin: 0; font-size: 15px; font-weight: 500; color: var(--muted);">Click to upload screenshot or drag & drop here</p>
+            <img id="image-preview" class="hidden" style="max-height: 150px; margin-top: 10px; border-radius: 6px;" />
+          </div>
+        </div>
+
+        <div class="analyser-footer"><span id="counter">0 / 1000</span><button id="analyse">Analyse claim <span>→</span></button></div>
       </section>
+
       <section id="result" class="result hidden" aria-live="polite">
         <div class="verdict-card">
-          <div><p class="eyebrow">ASSESSMENT</p><h2 id="verdict-title">Potentially misleading</h2><<p id="verdict-summary">The claim appears to overstate UNESCO’s position. There is no evidence of a worldwide UNESCO smartphone ban.</p></div>
+          <div><p class="eyebrow">ASSESSMENT</p><h2 id="verdict-title">Potentially misleading</h2><p id="verdict-summary">The claim appears to overstate public health or institutional guidelines.</p></div>
           <div class="score"><strong id="score">42</strong><span>confidence<br />score</span></div>
         </div>
         <div class="grid">
-          <article><h3>What we found</h3><p id="finding">UNESCO has published guidance on technology in education and recommends age-appropriate, human-centred use. It does not impose global bans.</p><a href="#sources">View evidence trail →</a></article>
-          <article><h3>Red flags to notice</h3><ul id="flags"><li><b>Absolute wording:</b> “worldwide” suggests a sweeping rule.</li><li><b>No date or source:</b> The claim does not cite an official announcement.</li><li><b>Missing context:</b> Guidance and a legal ban are different things.</li></ul></article>
-          <article class="next"><h3>Before you share</h3><p>Look for the original announcement, check its date, and compare more than one credible source.</p><button id="reset">Check another claim</button></article>
+          <article><h3>What we found</h3><p id="finding">Official repositories show no matching emergency validation for this claim.</p><a href="#sources">View evidence trail →</a></article>
+          <article><h3>Red flags to notice</h3><ul id="flags"><li><b>Absolute wording:</b> Suggests a sweeping rule without proof.</li></ul></article>
+          <article class="next">
+            <h3>Before you share</h3>
+            <p>Look for original announcements, check dates, and consult official portals.</p>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+            <button id="share-mil" style="background: var(--lime); color: var(--ink); border: none; padding: 10px; border-radius: 6px; font: 600 13px 'DM Sans'; cursor: pointer;">Export MIL Summary 📋</button>
+            <button id="reset">Check another claim</button>
+            </div>
+          </article>
         </div>
+        
         <section id="sources" class="trail">
-  <p class="eyebrow">SUGGESTED VERIFICATION TRAIL</p>
-  <h3 id="sources-heading">Where to check next</h3>
-  <div id="source-list" class="source-list"></div>
-  <p class="trail-caption">
-    These resources help users verify a claim independently. They are not proof that this specific claim has been live fact-checked.
-  </p>
-</section>
+          <p class="eyebrow">INTERACTIVE EVIDENCE TRAIL</p>
+          <h3 id="sources-heading">Verification Workflow</h3>
+          
+          <!-- Visual Flowchart Node Row -->
+          <div class="trail-row">
+            <div class="node user">User Input</div>
+            <i></i>
+            <div class="node claim-node" id="node-type">Category</div>
+            <i></i>
+            <div class="node source" id="node-source">Source Match</div>
+            <i></i>
+            <div class="node outcome" id="node-outcome">Verdict</div>
+          </div>
+
+          <div id="source-list" class="source-list"></div>
+          <p class="trail-caption">
+            TruthLens guides users through transparent verification trails without relying on black-box assumptions.
+          </p>
+        </section>
+      </section>
       <section class="how"><p class="eyebrow">HOW TRUTHLENS HELPS</p><div><span>01</span><p>Find the claim</p><span>02</span><p>Check the evidence</p><span>03</span><p>Learn the skill</p></div></section>
+      <!-- Advanced Agentic Telemetry Drawer -->
+      <section class="telemetry-box" style="margin-top: 40px; background: var(--ink); color: #8ef99f; font-family: monospace; padding: 18px 24px; border-radius: 12px; font-size: 13px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #2d4a3e; padding-bottom: 6px;">
+          <span><strong>TRUTHLENS_AGENT_CORE v2.6</strong> [READY]</span>
+          <span id="telemetry-status" style="color: var(--lime);">● System Idle</span>
+        </div>
+        <div id="telemetry-logs" style="color: #a2ab9c; line-height: 1.6;">
+          > System initialized. Awaiting user input or screenshot stream...
+        </div>
+      </section>
     </main>
     <footer>TruthLens is an educational tool, not a final arbiter of truth. Always consult original, credible sources.</footer>
     <script src="app.js"></script>

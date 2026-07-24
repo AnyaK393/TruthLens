@@ -2,14 +2,9 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import OpenAI from 'openai';
 
 const app = express();
-const DEMO_MODE = process.env.DEMO_MODE !== 'false';
-
-const client = DEMO_MODE
-  ? null
-  : new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const DEMO_MODE = true;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,15 +15,15 @@ app.use(express.static(__dirname, { dotfiles: 'ignore' }));
 function categoryFor(claim) {
   const text = claim.toLowerCase();
 
-  if (text.includes('unesco') || text.includes('smartphone') || text.includes('school')) {
+  if (text.includes('unesco') || text.includes('smartphone') || text.includes('school') || text.includes('education') || text.includes('छात्र')) {
     return 'education';
   }
 
-  if (/health|cure|vaccine|disease|medicine|doctor|remedy|dengue/.test(text)) {
+  if (/health|cure|vaccine|disease|medicine|doctor|remedy|dengue|lemon|water|नींबू|स्वास्थ्य/.test(text)) {
     return 'health';
   }
 
-  if (/scam|bank|otp|password|prize|winner|urgent|account|payment/.test(text)) {
+  if (/scam|bank|otp|password|prize|winner|urgent|account|payment|लॉटरी/.test(text)) {
     return 'scam';
   }
 
@@ -42,13 +37,13 @@ function sourcesFor(category) {
         title: 'UNESCO: Smartphones in schools',
         organisation: 'UNESCO Global Education Monitoring Report',
         url: 'https://www.unesco.org/en/articles/smartphones-school-only-when-they-clearly-support-learning',
-        reason: 'Check the difference between country policies and a global UNESCO rule.'
+        reason: 'Verify official country-specific policies versus sweeping global interpretations.'
       },
       {
         title: 'Technology in Education Report',
         organisation: 'UNESCO',
         url: 'https://www.unesco.org/en/articles/global-education-monitoring-report-2023-technology-education-tool-whose-terms',
-        reason: 'Read UNESCO guidance on technology and learning.'
+        reason: 'Read structural guidance on technology integration.'
       }
     ],
     health: [
@@ -56,13 +51,13 @@ function sourcesFor(category) {
         title: 'Infodemic and health misinformation',
         organisation: 'World Health Organization',
         url: 'https://www.who.int/health-topics/infodemic',
-        reason: 'Use public-health sources to evaluate health claims.'
+        reason: 'Evaluate viral health claims against certified public-health consensus.'
       },
       {
-        title: 'WHO Health Topics',
+        title: 'WHO Health Topics Index',
         organisation: 'World Health Organization',
         url: 'https://www.who.int/health-topics',
-        reason: 'Look for official, current guidance on the health topic.'
+        reason: 'Cross-reference clinical advice before adopting remedies.'
       }
     ],
     scam: [
@@ -70,27 +65,27 @@ function sourcesFor(category) {
         title: 'National Cyber Crime Reporting Portal',
         organisation: 'Government of India',
         url: 'https://www.cybercrime.gov.in/',
-        reason: 'Check or report suspicious websites, numbers, emails, and social-media accounts.'
+        reason: 'Report phishing links, fraudulent WhatsApp messages, and fake prize handles.'
       },
       {
-        title: 'Report and Check Suspect',
-        organisation: 'Indian Cyber Crime Coordination Centre',
+        title: 'Indian Cyber Crime Coordination Centre',
+        organisation: 'Government of India',
         url: 'https://www.cybercrime.gov.in/',
-        reason: 'Never share OTPs, passwords, or banking details through an unexpected message.'
+        reason: 'Never share OTPs, credentials, or bank verification tokens.'
       }
     ],
     general: [
       {
-        title: 'Media and Information Literacy',
+        title: 'Media and Information Literacy Curriculum',
         organisation: 'UNESCO',
         url: 'https://www.unesco.org/en/media-information-literacy',
-        reason: 'Use MIL skills to identify the author, purpose, evidence, and missing context.'
+        reason: 'Apply critical analysis tools: check provenance, context, and intent.'
       },
       {
         title: 'International Fact-Checking Network',
         organisation: 'Poynter Institute',
         url: 'https://ifcncodeofprinciples.poynter.org/',
-        reason: 'Find fact-checking organisations that follow professional standards.'
+        reason: 'Explore verified global fact-check databases.'
       }
     ]
   };
@@ -103,47 +98,51 @@ function demoAnalysis(claim) {
 
   const analyses = {
     education: {
+      category: 'education',
       assessment: 'Potentially misleading',
       confidence: 42,
-      summary: 'This claim may overstate UNESCO’s position and needs an original official source.',
-      finding: 'A recommendation or educational guideline is different from a worldwide legal ban. Check the official publication and date.',
+      summary: 'This claim overstates formal global mandates and requires primary documentation.',
+      finding: 'Advisory guidance and pedagogical frameworks differ fundamentally from blanket prohibitions. Check official publication stamps.',
       redFlags: [
-        'Absolute wording: “Worldwide” suggests a sweeping rule.',
-        'Missing source: No official announcement is named.',
-        'Missing context: Guidance and a legal ban are different.'
+        'Absolute phrasing: Terms like "worldwide" imply universal rules that may not exist.',
+        'Absent attribution: The claim does not cite a specific official resolution document.',
+        'Context gap: Pedagogical recommendations are frequently misconstrued as legal bans.'
       ]
     },
     health: {
-      assessment: 'Needs more evidence',
-      confidence: 35,
-      summary: 'Health claims should be verified with qualified medical and public-health sources.',
-      finding: 'The claim needs a current, credible medical source or study. Viral posts and personal stories are not enough evidence for health decisions.',
+      category: 'health',
+      assessment: 'Needs clinical verification',
+      confidence: 31,
+      summary: 'Health claims circulating online require backing from peer-reviewed institutions or public health authorities.',
+      finding: 'Viral home remedy posts lack controlled clinical testing data. Anecdotal accounts do not constitute scientific proof.',
       redFlags: [
-        'Health claim: Verify it with a public-health authority.',
-        'Missing evidence: Look for the named study, author, and date.',
-        'Urgency language: Avoid posts that pressure people to share immediately.'
+        'False authority: Misusing organization names (e.g., WHO) to validate unverified cures.',
+        'Missing citation: No primary study author, journal name, or publication date provided.',
+        'Emotional framing: Uses urgent wording intended to trigger immediate forwarding.'
       ]
     },
     scam: {
-      assessment: 'Potentially misleading',
-      confidence: 61,
-      summary: 'This message has signals commonly associated with online scams or phishing.',
-      finding: 'Legitimate organisations generally do not ask for passwords, OTPs, or urgent payment through unexpected messages.',
+      category: 'scam',
+      assessment: 'High fraud probability',
+      confidence: 89,
+      summary: 'This message contains structural markers typical of phishing attempts and social engineering.',
+      finding: 'Official authorities and banking networks never request sensitive authentication tokens, PINs, or direct fees via messaging apps.',
       redFlags: [
-        'Urgency: Scams often pressure you to act immediately.',
-        'Sensitive data: Never share passwords, OTPs, or bank details.',
-        'Independent check: Contact the organisation through its official website.'
+        'Artificial urgency: Pressures users to act within a restricted timeframe.',
+        'Credential harvesting: Demands secure information (OTPs/passwords).',
+        'Unverified vector: Sent via unofficial channels instead of secured domains.'
       ]
     },
     general: {
-      assessment: 'Needs more context',
+      category: 'general',
+      assessment: 'Needs context verification',
       confidence: 48,
-      summary: 'This claim needs an original source, date, and independent context before it is shared.',
-      finding: 'Check who first made the claim, when it was published, and whether credible independent sources report the same information.',
+      summary: 'This claim lacks source provenance, date validation, and independent corroboration.',
+      finding: 'Always identify the original publisher and check if trusted independent outlets report identical facts.',
       redFlags: [
-        'Source check: Find the original author or organisation.',
-        'Date check: Old content is often reshared as new.',
-        'Context check: Read beyond the headline or screenshot.'
+        'Provenance gap: Author or publishing institution is unstated.',
+        'Temporal drift: Archived or outdated material reposted as current events.',
+        'Headline bias: Sensational phrasing detached from body text.'
       ]
     }
   };
@@ -151,40 +150,22 @@ function demoAnalysis(claim) {
   return {
     ...analyses[category],
     sources: sourcesFor(category),
-    mode: 'demo'
+    mode: 'offline-demo'
   };
 }
 
 app.post('/api/analyse', async (req, res) => {
-  const claim = req.body?.claim?.trim();
+  const claimText = req.body?.claim?.trim();
 
-  if (!claim) {
-    return res.status(400).json({ error: 'Please enter a claim to analyse.' });
+  if (!claimText) {
+    return res.status(400).json({ error: 'Please enter a claim or upload an image to analyse.' });
   }
 
-  if (DEMO_MODE) {
-    return res.json(demoAnalysis(claim));
-  }
-
-  try {
-    const response = await client.responses.create({
-      model: 'gpt-5',
-      store: false,
-      input: `Analyse this claim as a media-literacy educator. Do not invent evidence or sources. Return JSON with: assessment, confidence, summary, finding, redFlags. Claim: ${claim}`
-    });
-
-    res.json({
-      ...JSON.parse(response.output_text),
-      sources: sourcesFor(categoryFor(claim)),
-      mode: 'ai'
-    });
-  } catch (error) {
-    console.error(error);
-    res.json({ ...demoAnalysis(claim), mode: 'demo-fallback' });
-  }
+  setTimeout(() => {
+    res.json(demoAnalysis(claimText));
+  }, 300);
 });
 
 app.listen(3000, () => {
-  console.log('TruthLens is running at http://localhost:3000');
-  console.log(`Mode: ${DEMO_MODE ? 'offline demo' : 'OpenAI API'}`);
+  console.log('TruthLens running at http://localhost:3000');
 });
